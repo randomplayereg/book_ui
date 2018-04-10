@@ -1,0 +1,50 @@
+<h1>User list</h1>
+
+<div id="list">
+
+</div>
+
+<script>
+$('document').ready(function(){
+
+  var admin_session;
+  if (getCookie("token")){
+    $.ajax({
+      url: "http://localhost:3000/users/" + getCookie("user_id") + "/check_admin",
+      headers: {
+        "Authorization": "Token token=" + getCookie('token')
+      },
+      type: "GET",
+      dataType: "json",
+      success: function(data){
+        console.log("admin ajax" + data);
+        admin_session = data.admin;
+      }
+    });
+  }
+
+  $.ajax({
+    type: "GET",
+    url: "http://localhost:3000/users",
+    dataType: "json",
+    success: function(data){
+      console.log(data);
+
+      $.each(data, function() {
+
+        var admin_action = "<li><a href='/users/edit/" + this.id + "'>Edit</a>" + "</li>";
+        var fragment = "<h4><strong>" + this.username + "</strong></h4>"
+                      + "<ul>"
+                        + "<li>Email: " + this.email + " " + "</li>"
+                        + "<li><i>Created " + this.book_count + " book(s)</i>" + "</li>";
+        if (admin_session == true){
+          fragment += admin_action;
+        }
+        fragment +=  "</ul>";
+        $('#list').append(fragment);
+      });
+    }
+  });
+});
+
+</script>

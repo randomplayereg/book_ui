@@ -1,0 +1,170 @@
+
+<h1>All books</h1>
+
+<div style='margin-left: 30px; margin-right: 30px;'>
+
+</div>
+
+<div class="dropdown" style='margin-left: 30px; margin-right: 30px'>
+  <a href="/books/new" class="btn btn-primary" role="button" aria-pressed="true"><strong>+</strong> Add new book</a>
+  <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sort by: <span class="caret"></span></a>
+  <ul class="dropdown-menu">
+    <li id='change-sort-by-title'><a href="#">Title</a></li>
+    <li id='change-sort-by-newest'><a href="#">Newest</a></li>
+    <li id='change-sort-by-oldest'><a href="#">Oldest</a></li>
+    <li role="separator" class="divider"></li>
+    <li role="separator" class="divider"></li>
+  </ul>
+</div>
+
+<div>
+  <p id='test'></p>
+</div>
+
+<div style='margin-left: 30px; margin-right: 30px'>
+  <nav aria-label="Page navigation example">
+    <ul id="paginate-container"class="pagination">
+    </ul>
+  </nav>
+</div>
+
+<div class="card-columns" style='margin-top: 2px; padding: 30px'>
+</div>
+
+<script>
+  var the_data;
+  function call_delete(the_id){
+    if (confirm('Are you sure you want to burn this book, mastah?')) {
+      $.ajax({
+        type: "DELETE",
+        url: "http://localhost:3000/books/" + the_id,
+        headers: { "Authorization": "Token token=" + getCookie('token') },
+        success: function(){
+          $('#card_' + the_id).fadeOut();
+        },
+        error: function(){
+          alert(data.responseJSON.errors[0].detail);
+        }
+      });
+    };
+  }
+
+  function ajax_GetAllBooks(is_admin_session){
+    $.ajax({
+      type: "GET",
+      url: "http://localhost:3000/books",
+      dataType: "json",
+      data: {sort_by: getCookie("sort_by"), page: getCookie("page")},
+      success: function(data){
+                console.log("ajax_GetAllBooks");
+        var num = 359;
+        var big_fragment = ''
+        $.each(data, function() {
+          var edit_delete_function = "<button type='button' class='btn btn-danger' onclick='call_delete(" + this.id + ")'>Delete</button>"
+                                   + "<a class='btn btn-info' href='/books/edit/" + this.id + "' role='button'>Edit</a>";
+          var buttonForAdmin = ""
+          if (is_admin_session == true){
+            buttonForAdmin = edit_delete_function;
+          }
+
+          big_fragment += "<div class='card' id='card_" + this.id + "' >"
+                         + "<img class='card-img-top' weight='369' height='160' src='https://picsum.photos/" + (num++).toString() + "/160?random' alt='Card image cap'>"
+                         + "<div class='card-body'>"
+                           + "<h5 class='card-title lead'>" + this.title + "</h5>"
+                           + "<p class='card-text'>" + this.author + "</p>"
+                           + "<hr>"
+                           + "<p class='card-text'>" + this.user.username + "</p>"
+                           + "<p class='card-text'><small class='text-muted'>Created: " + moment(this.created_at).fromNow() + "</small></p>"
+                           + "<p class='card-text'><small class='text-muted'>Last updated: " + moment(this.updated_at).fromNow() + "</small></p>"
+                           + "<a class='btn btn-primary' href='/books/show/" + this.id + "' role='button'>More...</a>"
+                           + buttonForAdmin
+                         + "</div>"
+                        + "</div>";
+        });
+
+        $('.card-columns').fadeOut('slow', function() {
+            $('.card-columns').html(big_fragment);
+            $('.card-columns').fadeIn('slow');
+        });
+      }
+    });
+  }
+
+  function change_page_cookie(changeto){
+    //debugger;
+    console.log("change_cookie");
+    if (getCookie("page")){
+      $('#pagination_' + getCookie("page")).removeClass('disabled');
+    };
+    setCookie("page", changeto, 15);
+    $('#pagination_' + changeto).addClass('disabled');
+
+    var is_admin_session;
+    if (getCookie("token")){
+      $.ajax({
+        url: "http://localhost:3000/users/" + getCookie("user_id") + "/check_admin",
+        headers: { "Authorization": "Token token=" + getCookie('token') },
+        type: "GET",
+        dataType: "json",
+        success: function(data){
+                  console.log("admin_session");
+          is_admin_session = data.admin;
+          ajax_GetAllBooks(is_admin_session); // with login
+        }
+      });
+    } else {
+      ajax_GetAllBooks(false); // no login
+    }
+
+
+  };
+
+  $('document').ready(function(){
+    // set default sort-by value when calling ajax to server to get books
+    console.log("dcm reAdy");
+    $('#change-sort-by-title').click(function(e){
+      setCookie("sort_by", "title", 15);
+    });
+    $('#change-sort-by-newest').click(function(e){
+      setCookie("sort_by", "newest", 15);
+    });
+    $('#change-sort-by-oldest').click(function(e){
+      setCookie("sort_by", "oldest", 15);
+    });
+
+
+
+    $.ajax({
+      url: "http://localhost:3000/books/total",
+      type: "GET",
+      dataType: "json",
+      success: function(data){
+
+        $('#paginate-container').empty();
+        var total_books = data.total;
+        var total_pages = Math.floor(total_books / 5);
+        var fragment = "";
+        for (i = 0; i < total_pages; i++){
+          fragment += "<li id='pagination_" + (i+1) + "' class='page-item'><a class='page-link' href='#" + (i+1) + "'>" + (i+1) + "</a></li>";
+        };
+        $('#paginate-container').append(fragment);
+
+        var url = window.location.href; // "http:/localhost3001/books/all#2" or "http:/localhost3001/books/all#"
+        if (url.lastIndexOf("#") != -1) {
+          var pageNum = url.substring(url.lastIndexOf("#") + 1, url.length); //"2" or ""
+          if (pageNum == "")
+            change_page_cookie("1");
+          else
+            change_page_cookie(pageNum);
+          console.log("pageNum: " + pageNum);
+        }
+        else {
+          var pageNum = "1";
+          console.log("pageNum: " + pageNum);
+          change_page_cookie(pageNum);
+        }
+      }
+    });
+  });
+
+</script>

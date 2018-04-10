@@ -1,0 +1,36 @@
+<h1>New Book</h1>
+
+<form>
+  <div><input type="text" name="title" placeholder="Title"></div>
+  <div><input type="text" name="author" placeholder="Author"></div>
+  <div>
+    <input type="submit" name="g" value="Submit" id="g">
+  </div>
+</form>
+
+<p id="test"></p>
+
+<script>
+  $(document).ready(function(){
+    $( "form" ).submit(function( e ) {
+      e.preventDefault();
+      var jsontype = objectifyForm($( this ).serializeArray());
+      var formdata = JSON.stringify(jsontype);
+      console.log(jsontype);
+      $.ajax({
+          type: "POST",
+          url: "http://localhost:3000/books",
+          contentType: "application/json; charset=utf-8", // this
+          dataType: "json", // and this
+          data: formdata,
+          headers: { "Authorization": "Token token=" + getCookie('token') },
+          success: function(){
+            alertAtElement("test", 'The book has succesffuly created!');
+          },
+          error: function(data){
+            alertAtElement("test", data.responseJSON.errors[0].detail);
+          }
+      });
+    });
+  });
+</script>

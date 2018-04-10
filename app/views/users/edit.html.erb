@@ -1,0 +1,68 @@
+<h1>Edit User</h1>
+
+<form>
+  <div><input id="username_box" type="text" name="username" placeholder="Username"></div>
+  <div><input id="email_box" type="text" name="email" placeholder="Email"></div>
+  <div><input id="password_box" type="password" name="password" placeholder="Edit password"></div>
+  <div>
+    <input type="submit" name="g" value="Submit" id="g">
+  </div>
+</form>
+
+<button id="del_btn" type="button">Delete this user?</button>
+
+<div id="test"></div>
+
+<script>
+  $(document).ready(function(){
+    $.ajax({
+      type: "GET",
+      url: "http://localhost:3000/users/" + <%= "#{params[:id]}" %>,
+      dataType: "json",
+      success: function(data){
+        console.log(data);
+        $('#username_box').val(data.username);
+        $('#email_box').val(data.email);
+      }
+    });
+    $( "form" ).submit(function( e ) {
+      e.preventDefault();
+      var jsontype = objectifyForm($( this ).serializeArray());
+      var formdata = JSON.stringify(jsontype);
+
+      // var formdata = JSON.stringify($( this ).serializeArray());
+      console.log(jsontype);
+
+      $.ajax({
+          type: "PUT",
+          url: "http://localhost:3000/users/" + <%= "#{params[:id]}" %>,
+          headers: { "Authorization": "Token token=" + getCookie('token') },
+          contentType: "application/json; charset=utf-8", // this
+          dataType: "json", // and this
+          data: formdata ,
+          success: function(){
+            alertAtElement("test", 'The user has been succesffuly updated!');
+          },
+          error: function(data){
+            userInfoAlertAtElement("test", data.responseJSON);
+            //alertAtElement("test", 'Invalid');
+            console.log(data);
+          }
+      });
+    });
+    $( "#del_btn" ).click(function( ) {
+      $.ajax({
+        type: "DELETE",
+        url: "http://localhost:3000/users/" + <%= "#{params[:id]}" %>,
+        headers: { "Authorization": "Token token=" + getCookie('token') },
+        success: function(){
+          alertAtElement("test", 'The user has succesffuly deleted!');
+        },
+        error: function(data){
+          console.log(data);
+          alertAtElement("test", data.responseJSON.errors[0].detail);
+        }
+      });
+    });
+  });
+</script>

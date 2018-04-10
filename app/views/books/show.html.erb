@@ -1,0 +1,34 @@
+<p>
+  <strong>Title:</strong>
+  <span id="title"></span>
+</p>
+
+<p>
+  <strong>Author:</strong>
+  <span id="author"></span>
+</p>
+
+<p>
+  <strong>Creator:</strong>
+  <span id="creator"></span>
+</p>
+
+<a href="/books/all">Back</a>
+
+<script>
+$('document').ready(function(){
+  var url = "http://localhost:3000/books/" + <%= params[:id] %>
+  $.ajax({
+    type: "GET",
+    url: url,
+    dataType: "json",
+    success: function(data){
+      console.log(data);
+      $('#title').html(data.title);
+      $('#author').html(data.author);
+      $('#creator').html(data.user.username);
+    }
+  });
+});
+
+</script>

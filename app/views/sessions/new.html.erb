@@ -1,0 +1,51 @@
+<h1>New Book</h1>
+
+<form>
+  <div><input type="text" name="email" placeholder="email"></div>
+  <div><input type="password" name="password" placeholder="password"></div>
+  <div>
+    <input type="submit" name="g" value="Submit" id="g">
+  </div>
+</form>
+
+<p id="test"></p>
+
+<script>
+  $(document).ready(function(){
+
+    if (CookieEmpty() == false) {
+      alert("You already login!");
+      window.location.replace('/');
+    }
+
+    $( "form" ).submit(function( e ) {
+      e.preventDefault();
+      var jsontype = objectifyForm($( this ).serializeArray());
+      var formdata = JSON.stringify(jsontype);
+
+      // var formdata = JSON.stringify($( this ).serializeArray());
+      console.log(jsontype);
+      console.log(formdata);
+
+      $.ajax({
+          type: "POST",
+          url: "http://localhost:3000/newsession",
+          contentType: "application/json; charset=utf-8", // this
+          dataType: "json", // and this
+          data: formdata ,
+          success: function(data){
+            alertAtElement("test", "Successful login");
+            setCookie("token", data.token, 15);
+            setCookie("user_id", data.user_id, 15);
+            setCookie("username", data.username, 15);
+            window.location.replace('/');
+          },
+          error: function(data){
+            alertAtElement('test', data.responseJSON.errors[0].detail);
+          }
+      });
+    });
+  });
+
+  $.post
+</script>
