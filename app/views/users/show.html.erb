@@ -15,7 +15,7 @@
 
 <script>
 $('document').ready(function(){
-  var url = "http://localhost:3000/books/" + <%= params[:id] %>
+  var url = "http://localhost:3000/api/v1/books/" + <%= params[:id] %>
   $.ajax({
     type: "GET",
     url: url,

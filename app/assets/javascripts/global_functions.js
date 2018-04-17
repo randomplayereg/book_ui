@@ -64,6 +64,9 @@ function userInfoAlertAtElement(element_id, error){
   if (error.password){
     asList += "<li>" + "<strong>Password: </strong>" + error.password + "</li>";
   };
+  if (error.errors[0].detail){
+    asList += "<li>" + "<strong>Unauthorized: </strong>" + error.errors[0].detail + "</li>";
+  };
   asList += "</ul>";
   $('#' + element_id).append(asList);
 }

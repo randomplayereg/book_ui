@@ -6,11 +6,9 @@
 
 <script>
 $('document').ready(function(){
-
-  var admin_session;
   if (getCookie("token")){
     $.ajax({
-      url: "http://localhost:3000/users/" + getCookie("user_id") + "/check_admin",
+      url: "http://localhost:3000/api/v1/users/" + getCookie("user_id") + "/check_admin",
       headers: {
         "Authorization": "Token token=" + getCookie('token')
       },
@@ -18,14 +16,16 @@ $('document').ready(function(){
       dataType: "json",
       success: function(data){
         console.log("admin ajax" + data);
-        admin_session = data.admin;
+        ajax_GetAllUsers(data.admin);
       }
     });
   }
+});
 
+function ajax_GetAllUsers(admin_session){
   $.ajax({
     type: "GET",
-    url: "http://localhost:3000/users",
+    url: "http://localhost:3000/api/v1/users",
     dataType: "json",
     success: function(data){
       console.log(data);
@@ -45,6 +45,5 @@ $('document').ready(function(){
       });
     }
   });
-});
-
+}
 </script>

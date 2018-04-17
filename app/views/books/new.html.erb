@@ -3,23 +3,67 @@
 <form>
   <div><input type="text" name="title" placeholder="Title"></div>
   <div><input type="text" name="author" placeholder="Author"></div>
+  <div><input type="file" name="picture" id="image_upload" onchange="handleFileSelect()"></div>
   <div>
     <input type="submit" name="g" value="Submit" id="g">
   </div>
 </form>
 
+<button type=button onclick='handleFileSelect()'>Display</button></br>
+
 <p id="test"></p>
 
+<img id='show'></img>
+
 <script>
+
+  var imagedata;
+  function handleFileSelect()
+  {
+    if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
+      alert('The File APIs are not fully supported in this browser.');
+      return;
+    }
+
+    input = document.getElementById('image_upload');
+    if (!input) {
+      alert("Um, couldn't find the fileinput element.");
+    }
+    else if (!input.files) {
+      alert("This browser doesn't seem to support the `files` property of file inputs.");
+    }
+    else if (!input.files[0]) {
+      alert("Please select a file before clicking 'Load'");
+    }
+    else {
+      file = input.files[0];
+      fr = new FileReader();
+      fr.onload = function(e) {
+        imagedata = e.target.result;
+        console.log(imagedata);
+      }
+      fr.readAsDataURL(file);
+    }
+  }
+
   $(document).ready(function(){
     $( "form" ).submit(function( e ) {
       e.preventDefault();
       var jsontype = objectifyForm($( this ).serializeArray());
-      var formdata = JSON.stringify(jsontype);
-      console.log(jsontype);
+
+      var test = {
+        "title" : jsontype.title,
+        "author" : jsontype.author,
+        "picture" : imagedata
+      };
+      console.log("after trigger click file :" + test);
+      var formdata = JSON.stringify(test);
+
+      // var jsontype = objectifyForm($( this ).serializeArray());
+      // var formdata = JSON.stringify(jsontype);
       $.ajax({
           type: "POST",
-          url: "http://localhost:3000/books",
+          url: "http://localhost:3000/api/v1/books",
           contentType: "application/json; charset=utf-8", // this
           dataType: "json", // and this
           data: formdata,

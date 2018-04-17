@@ -13,11 +13,15 @@
   <span id="creator"></span>
 </p>
 
+<div>
+  <img id="show" height="500"></img>
+</div>
+
 <a href="/books/all">Back</a>
 
 <script>
 $('document').ready(function(){
-  var url = "http://localhost:3000/books/" + <%= params[:id] %>
+  var url = "http://localhost:3000/api/v1/books/" + <%= params[:id] %>
   $.ajax({
     type: "GET",
     url: url,
@@ -27,6 +31,7 @@ $('document').ready(function(){
       $('#title').html(data.title);
       $('#author').html(data.author);
       $('#creator').html(data.user.username);
+      $("#show").attr("src", "http://localhost:3000" + data.picture.url);
     }
   });
 });

@@ -15,14 +15,16 @@
 
 <script>
   $(document).ready(function(){
+    var the_username, is_admin_session;
     $.ajax({
       type: "GET",
-      url: "http://localhost:3000/users/" + <%= "#{params[:id]}" %>,
+      url: "http://localhost:3000/api/v1/users/" + <%= "#{params[:id]}" %>,
       dataType: "json",
       success: function(data){
         console.log(data);
         $('#username_box').val(data.username);
         $('#email_box').val(data.email);
+        the_username = data.username;
       }
     });
     $( "form" ).submit(function( e ) {
@@ -35,7 +37,7 @@
 
       $.ajax({
           type: "PUT",
-          url: "http://localhost:3000/users/" + <%= "#{params[:id]}" %>,
+          url: "http://localhost:3000/api/v1/users/" + <%= "#{params[:id]}" %>,
           headers: { "Authorization": "Token token=" + getCookie('token') },
           contentType: "application/json; charset=utf-8", // this
           dataType: "json", // and this
@@ -51,18 +53,43 @@
       });
     });
     $( "#del_btn" ).click(function( ) {
-      $.ajax({
-        type: "DELETE",
-        url: "http://localhost:3000/users/" + <%= "#{params[:id]}" %>,
-        headers: { "Authorization": "Token token=" + getCookie('token') },
-        success: function(){
-          alertAtElement("test", 'The user has succesffuly deleted!');
-        },
-        error: function(data){
-          console.log(data);
-          alertAtElement("test", data.responseJSON.errors[0].detail);
-        }
-      });
+      if (getCookie('token'))
+        ajax_CheckAdminAndDeleteUser();
+      else
+        alertAtElement("test", "You need to log in first!");
     });
   });
+
+  function ajax_CheckAdminAndDeleteUser(){
+    $.ajax({
+      url: "http://localhost:3000/api/v1/users/" + getCookie("user_id") + "/check_admin",
+      headers: { "Authorization": "Token token=" + getCookie('token') },
+      type: "GET",
+      dataType: "json",
+      success: function(data){
+        is_admin_session = data.admin;
+        ajax_DeleteUser();
+      },
+      error: function(data){
+      }
+    });
+  }
+
+  function ajax_DeleteUser(){
+    $.ajax({
+      type: "DELETE",
+      url: "http://localhost:3000/api/v1/users/" + <%= "#{params[:id]}" %>,
+      headers: { "Authorization": "Token token=" + getCookie('token') },
+      success: function(){
+        //alertAtElement("test", 'The user has succesffuly deleted);
+        alert("The user have been deleted!");
+        if (!is_admin_session) deleteAllCookies();
+        window.location.replace("/");
+      },
+      error: function(data){
+        console.log(data);
+        alertAtElement("test", data.responseJSON.errors[0].detail);
+      }
+    });
+  }
 </script>

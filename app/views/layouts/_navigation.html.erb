@@ -78,7 +78,7 @@
         e.preventDefault();
         $.ajax({
             type: "DELETE",
-            url: "http://localhost:3000/destroysession",
+            url: "http://localhost:3000/api/v1/auths",
             headers: {"Authorization": "Token token=" + getCookie('token')},
             success: function(){
               deleteAllCookies();
