@@ -15,7 +15,7 @@
 
 <script>
   $(document).ready(function(){
-    var the_username, is_admin_session;
+    var is_admin_session;
     $.ajax({
       type: "GET",
       url: "http://localhost:3000/api/v1/users/" + <%= "#{params[:id]}" %>,
@@ -24,7 +24,6 @@
         console.log(data);
         $('#username_box').val(data.username);
         $('#email_box').val(data.email);
-        the_username = data.username;
       }
     });
     $( "form" ).submit(function( e ) {
@@ -83,7 +82,7 @@
       success: function(){
         //alertAtElement("test", 'The user has succesffuly deleted);
         alert("The user have been deleted!");
-        if (!is_admin_session) deleteAllCookies();
+        if (<%= params[:id] %> == getCookie('user_id')) deleteAllCookies();
         window.location.replace("/");
       },
       error: function(data){

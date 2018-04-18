@@ -55,18 +55,32 @@
     };
   }
 
-  var headers = "<tr> <th>ID</th> <th>Title</th>  <th>Author</th>   <th>Created by</th>   <th>Created at</th>    <th>Updated at</th>  </tr>"
+  function setSortCookie(attr){
+    if (localStorage.getItem("sort_attr") != attr){
+      localStorage.setItem("sort_dir", "ASC");
+    } else if (localStorage.getItem("sort_dir") == "ASC"){
+      localStorage.setItem("sort_dir", "DESC");
+    }
+    else{
+      localStorage.setItem("sort_dir", "ASC");
+    }
+
+    localStorage.setItem("sort_attr", attr);
+
+    ajax_GetTable();
+  };
 
   function ajax_GetAllBooks(is_admin_session){
     $('#books_table').empty();
+
     $.ajax({
       type: "GET",
       url: "http://localhost:3000/api/v1/books",
       dataType: "json",
-      data: {sort_by: getCookie("sort_by"), page: getCookie("page")},
+      data: {sort_params: {attr: localStorage.getItem("sort_attr"), direction: localStorage.getItem("sort_dir")}, filter_params: {attr: "", operator: "=", value: ""}, page: getCookie("page")},
       success: function(data){
         console.log(data);
-        var num = 359;
+        var count = 1;
         var big_fragment = ''
         $.each(data, function() {
           var add_actions_column = "<th colspan='2'>Delete</th>";
@@ -77,8 +91,12 @@
             buttonForAdmin = actions_function;
           }
 
+          if (getCookie("page") != "") {
+            var offset = parseInt(getCookie("page")) - 1;
+            var numpos = offset * 5 + count++;
+          }
           big_fragment += "<tr>"
-                        +   "<td>" + this.id + "</td>"
+                        +   "<td>" + numpos + "</td>"
                         +   "<td>" + "<a href=/books/show/" + this.id + ">" + this.title + "</a>" + "</td>"
                         +   "<td>" + this.author + "</td>"
                         +   "<td>" + this.user.username + "</td>"
@@ -86,7 +104,15 @@
                         +   "<td>" + moment(this.updated_at).fromNow() + "</td>"
                       +   "</tr>";
         });
-
+        // var tt = "onclick=" + "setSortCookie(" + "'" + "title" + "'" + ")";
+        var headers = "<tr>"
+                      + "<th>ID</th>"
+                      + "<th>Title" + "<button " + "onclick=" + "setSortCookie(" + "'" + "title" + "'" + ")" + ">v</button>" + "</th>"
+                      + "<th>Author" + "<button " + "onclick=" + "setSortCookie(" + "'" + "author" + "'" + ")" + ">v</button>" + "</th>"
+                      + "<th>Created by" + "<button " + "onclick=" + "setSortCookie(" + "'" + "username" + "'" + ")" + ">v</button>" + "</th>"
+                      + "<th>Created at" + "<button " + "onclick=" + "setSortCookie(" + "'" + "created_at" + "'" + ")" + ">v</button>" + "</th>"
+                      + "<th>Updated at" + "<button " + "onclick=" + "setSortCookie(" + "'" + "updated_at" + "'" + ")" + ">v</button>" + "</th>"
+                    + "</tr>"
         $('#books_table').fadeOut('fast', function() {
             $('#books_table').empty();
             $('#books_table').fadeIn('fast', function(){
@@ -97,15 +123,7 @@
     });
   }
 
-  function change_page_cookie(changeto){
-    //debugger;
-    console.log("change_cookie");
-    if (getCookie("page")){
-      $('#pagination_' + getCookie("page")).removeClass('disabled');
-    };
-    setCookie("page", changeto, 15);
-    $('#pagination_' + changeto).addClass('disabled');
-
+  function ajax_GetTable(){
     var is_admin_session;
     if (getCookie("token")){
       $.ajax({
@@ -126,7 +144,16 @@
       ajax_GetAllBooks(false); // no login
     }
 
+  }
 
+  function change_page_cookie(changeto){
+    if (getCookie("page") == changeto){
+      $('#pagination_' + getCookie("page")).removeClass('disabled');
+    };
+    setCookie("page", changeto, 1);
+    $('#pagination_' + changeto).addClass('disabled');
+
+    ajax_GetTable();
   };
 
   $('document').ready(function(){
@@ -150,7 +177,7 @@
 
         $('#paginate-container').empty();
         var total_books = data.total;
-        var total_pages = Math.floor(total_books / 5) + 1;
+        var total_pages = Math.floor((total_books - 1) / 5) + 1;
         var fragment = "";
         for (i = 0; i < total_pages; i++){
           fragment += "<li id='pagination_" + (i+1) + "' class='page-item'><a class='page-link' href='#" + (i+1) + "'>" + (i+1) + "</a></li>";

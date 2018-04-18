@@ -24,6 +24,12 @@
         console.log(data);
         $('#title_box').val(data.title);
         $('#author_box').val(data.author);
+      },
+      error: function(data){
+        // $('.form').hidden().empty();
+        // $('#del_btn').hidden().empty();
+        // $('.a').hidden().empty();
+        console.log(data);
       }
     });
 
