@@ -83,6 +83,9 @@
                            + "</div>";
           $('.card-columns').append(big_fragment);
         });
+      },
+      error: function(data){
+        console.log(data);
       }
     });
   });
