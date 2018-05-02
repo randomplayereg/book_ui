@@ -1,6 +1,8 @@
-//var api_url = "http://boks-backands.herokuapp.com/api/v2/"
-var api_url = "http://localhost:3000/api/v2/";
-var server_url = "http://localhost:3000/";
+var api_url = "http://boks-backands.herokuapp.com/api/v2/"
+var server_url = "http://boks-backands.herokuapp.com/";
+// var api_url = "http://localhost:3000/api/v2/";
+// var server_url = "http://localhost:3000/";
+
 // TODO: chagne api url
 
 // GET COOKIE BY TAG-NAME
