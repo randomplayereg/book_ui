@@ -6,17 +6,24 @@
 
 <script>
 $('document').ready(function(){
-  if (getCookie("token")){
+  if (localStorage.getItem("access-token")){
     $.ajax({
-      url: "http://localhost:3000/api/v1/users/" + getCookie("user_id") + "/check_admin",
+      url: api_url + "members/check_admin",
+
       headers: {
-        "Authorization": "Token token=" + getCookie('token')
+        "access-token": localStorage.getItem("access-token"),
+        "client":       localStorage.getItem("client"),
+        "uid":          localStorage.getItem("uid"),
+        "expiry":       localStorage.getItem("expiry")
       },
       type: "GET",
       dataType: "json",
       success: function(data){
         console.log("admin ajax" + data);
         ajax_GetAllUsers(data.admin);
+      },
+      error: function(data){
+        console.log(data);
       }
     });
   }
@@ -28,7 +35,7 @@ $('document').ready(function(){
 function ajax_GetAllUsers(admin_session){
   $.ajax({
     type: "GET",
-    url: "http://localhost:3000/api/v1/users",
+    url: api_url + "members",
     dataType: "json",
     success: function(data){
       console.log(data);
@@ -36,9 +43,8 @@ function ajax_GetAllUsers(admin_session){
       $.each(data, function() {
 
         var admin_action = "<li><a href='/users/edit/" + this.id + "'>Edit</a>" + "</li>";
-        var fragment = "<h4><strong>" + this.username + "</strong></h4>"
+        var fragment = "<h4><strong>" + this.email + "</strong></h4>"
                       + "<ul>"
-                        + "<li>Email: " + this.email + " " + "</li>"
                         + "<li><i>Created " + this.book_count + " book(s)</i>" + "</li>";
         if (admin_session == true){
           fragment += admin_action;

@@ -21,17 +21,16 @@
 
 <script>
 $('document').ready(function(){
-  var url = "http://localhost:3000/api/v1/books/" + <%= params[:id] %>
   $.ajax({
     type: "GET",
-    url: url,
+    url: api_url + "books/" + <%= params[:id] %>,
     dataType: "json",
     success: function(data){
       console.log(data);
       $('#title').html(data.title);
       $('#author').html(data.author);
-      $('#creator').html(data.user.username);
-      $("#show").attr("src", "http://localhost:3000" + data.picture.url);
+      $('#creator').html(data.member.email);
+      $("#show").attr("src", server_url + data.picture.url.substring(1));      
     }
   });
 });

@@ -1,7 +1,6 @@
 <h1>New User</h1>
 
 <form>
-  <div><input type="text" name="username" placeholder="Username"></div>
   <div><input type="text" name="email" placeholder="Email"></div>
   <div><input type="password" name="password" placeholder="Password"></div>
   <div>
@@ -25,7 +24,7 @@
 
       $.ajax({
           type: "POST",
-          url: "http://localhost:3000/api/v1/users",
+          url: api_url + "members",
           contentType: "application/json; charset=utf-8", // this
           dataType: "json", // and this
           data: formdata,
@@ -40,6 +39,4 @@
       });
     });
   });
-
-  $.post
 </script>

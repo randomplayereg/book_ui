@@ -1,3 +1,8 @@
+//var api_url = "http://boks-backands.herokuapp.com/api/v2/"
+var api_url = "http://localhost:3000/api/v2/";
+var server_url = "http://localhost:3000/";
+// TODO: chagne api url
+
 // GET COOKIE BY TAG-NAME
 function getCookie(cname) {
   var name = cname + "=";
@@ -52,9 +57,10 @@ function alertAtElement(element_id, message){
 }
 
 // PRINT A LIST FROM ARRAY - MAINLY FOR PRINTING INVALID INPUT WHILE CREATING/EDITTING USERS
-function userInfoAlertAtElement(element_id, error){
+function userInfoAlertAtElement(element_id, format){
   $('#' + element_id).empty();
   var asList = "<ul>";
+  var error = format.errors;
   if (error.email){
     asList += "<li>" + "<strong>Email: </strong>" + error.email + "</li>";
   };
@@ -64,9 +70,11 @@ function userInfoAlertAtElement(element_id, error){
   if (error.password){
     asList += "<li>" + "<strong>Password: </strong>" + error.password + "</li>";
   };
-  if (error.errors[0].detail){
-    asList += "<li>" + "<strong>Unauthorized: </strong>" + error.errors[0].detail + "</li>";
-  };
+  // if (error.errors)
+  //   if (error.errors[0].detail){
+  //     asList += "<li>" + "<strong>Unauthorized: </strong>" + error.errors[0].detail + "</li>";
+  //   };
+  // TODO: Unauthorized
   asList += "</ul>";
   $('#' + element_id).append(asList);
 }

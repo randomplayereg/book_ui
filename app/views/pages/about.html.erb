@@ -1,0 +1,23 @@
+<script>
+  $("document").ready(function(){
+
+    var pack = {email:"emil13@gmail.com", password:"12345678"};
+    send = JSON.stringify(pack);
+    $.ajax({
+      type: "POST",
+      //url: "http://boks-backands.herokuapp.com/api/v2/members/sign_up",
+      url: "http://boks-backands.herokuapp.com/api/v2/members",
+      contentType: "application/json; charset=utf-8", // this
+      dataType: "json", // and this
+      data: send,
+      success: function(){
+        console.log("OK");
+      },
+      error: function(data){
+        console.log(data);
+        console.log("WHAT?");
+      }
+    });
+  })
+
+</script>

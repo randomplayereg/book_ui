@@ -20,14 +20,19 @@
     if (confirm('Are you sure you want to perish this book, mastah?')) {
       $.ajax({
         type: "DELETE",
-        url: "http://localhost:3000/api/v1/books/" + the_id,
-        headers: { "Authorization": "Token token=" + getCookie('token') },
+        url: api_url + "books/" + the_id,
+        headers: {
+          "access-token": localStorage.getItem("access-token"),
+          "client":       localStorage.getItem("client"),
+          "uid":          localStorage.getItem("uid"),
+          "expiry":       localStorage.getItem("expiry")
+        },
         success: function(){
           //$('#test').html('The book has succesffuly deleted!');
           $('#card_' + the_id).fadeOut();
         },
         error: function(){
-          alert(data.responseJSON.errors[0].detail);
+          alert(data.responseText);
         }
       });
     };
@@ -38,23 +43,37 @@
     $('.card-columns').empty();
     $.ajax({
       type: "GET",
-      url: "http://localhost:3000/api/v1/books",
+      url: api_url + "books",
       dataType: "json",
-      data: {filter_by_id: getCookie("user_id")},
+      data: {
+        sort_params: {
+          attr: localStorage.getItem("sort_attr"),
+          direction: localStorage.getItem("sort_dir")
+        },
+        filter_params: {
+          attr: "member.email",
+          operator: "=",
+          value: localStorage.getItem("uid"),
+        },
+        page: getCookie("page")
+      },
       success: function(data){
         console.log("ajax" + data);
         the_data = data;
 
         var num = 369;
         $.each(data, function() {
-
-          var big_fragment = "<div class='card' id='card_" + this.id + "' >"
-                             + "<img class='card-img-top' weight='369' height='160' src='https://picsum.photos/" + (num++).toString() + "/160?random' alt='Card image cap'>"
-                             + "<div class='card-body'>"
+          console.log(this);
+          var big_fragment = "<div class='card' id='card_" + this.id + "' >";
+          if (this.picture.url != null)
+            big_fragment +=    "<img class='card-img-top' weight='369' height='160' src='" + server_url + this.picture.url.substring(1) + "' + alt='Card image cap'>";
+          else
+            big_fragment +=    "<img class='card-img-top' weight='369' height='160' src='' + alt='No image'>";
+          big_fragment +=      "<div class='card-body'>"
                                + "<h5 class='card-title lead'>" + this.title + "</h5>"
                                + "<p class='card-text'>" + this.author + "</p>"
                                + "<hr>"
-                               + "<p class='card-text'>" + this.user.username + "</p>"
+                               + "<p class='card-text'>" + this.member.email + "</p>"
                                + "<p class='card-text'><small class='text-muted'>Created: " + moment(this.created_at).fromNow() + "</small></p>"
                                + "<p class='card-text'><small class='text-muted'>Last updated: " + moment(this.updated_at).fromNow() + "</small></p>"
                                + "<button type='button' class='btn btn-danger' onclick='call_delete(" + this.id + ")'>Delete</button>"

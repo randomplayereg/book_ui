@@ -9,8 +9,6 @@
   </div>
 </form>
 
-<button type=button onclick='handleFileSelect()'>Display</button></br>
-
 <p id="test"></p>
 
 <img id='show'></img>
@@ -56,23 +54,27 @@
         "author" : jsontype.author,
         "picture" : imagedata
       };
-      console.log("after trigger click file :" + test);
       var formdata = JSON.stringify(test);
 
       // var jsontype = objectifyForm($( this ).serializeArray());
       // var formdata = JSON.stringify(jsontype);
       $.ajax({
           type: "POST",
-          url: "http://localhost:3000/api/v1/books",
+          url: api_url + "books",
           contentType: "application/json; charset=utf-8", // this
           dataType: "json", // and this
           data: formdata,
-          headers: { "Authorization": "Token token=" + getCookie('token') },
+          headers: {
+            "access-token": localStorage.getItem("access-token"),
+            "client":       localStorage.getItem("client"),
+            "uid":          localStorage.getItem("uid"),
+            "expiry":       localStorage.getItem("expiry")
+          },
           success: function(){
             alertAtElement("test", 'The book has succesffuly created!');
           },
           error: function(data){
-            alertAtElement("test", data.responseJSON.errors[0].detail);
+            alertAtElement("test", data.responseText);
           }
       });
     });

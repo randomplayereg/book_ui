@@ -7,4 +7,6 @@ class UsersController < ApplicationController
   end
   def index
   end
+  def myprofile
+  end
 end

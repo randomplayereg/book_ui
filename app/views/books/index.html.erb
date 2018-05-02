@@ -43,19 +43,24 @@
     if (confirm('Are you sure you want to burn this book, mastah?')) {
       $.ajax({
         type: "DELETE",
-        url: "http://localhost:3000/api/v1/books/" + the_id,
-        headers: { "Authorization": "Token token=" + getCookie('token') },
+        url: api_url + "books/" + the_id,
+        headers: {
+          "access-token": localStorage.getItem("access-token"),
+          "client":       localStorage.getItem("client"),
+          "uid":          localStorage.getItem("uid"),
+          "expiry":       localStorage.getItem("expiry")
+        },
         success: function(){
           $('#card_' + the_id).fadeOut();
         },
         error: function(){
-          alert(data.responseJSON.errors[0].detail);
+          alert(data.responseText);
         }
       });
     };
   }
 
-  function setSortCookie(attr){
+  function setSortParam(attr){
     if (localStorage.getItem("sort_attr") != attr){
       localStorage.setItem("sort_dir", "ASC");
     } else if (localStorage.getItem("sort_dir") == "ASC"){
@@ -70,49 +75,65 @@
     ajax_GetTable();
   };
 
-  function ajax_GetAllBooks(is_admin_session){
+  function ajax_GetAllBooks(admin_session){
     $('#books_table').empty();
 
     $.ajax({
       type: "GET",
-      url: "http://localhost:3000/api/v1/books",
+      url: api_url + "books",
       dataType: "json",
-      data: {sort_params: {attr: localStorage.getItem("sort_attr"), direction: localStorage.getItem("sort_dir")}, filter_params: {attr: "", operator: "=", value: ""}, page: getCookie("page")},
+      data: {
+        sort_params: {
+          attr: localStorage.getItem("sort_attr"),
+          direction: localStorage.getItem("sort_dir")
+        },
+        filter_params: {
+          attr: "",
+          operator: "=",
+          value: ""
+        },
+        page: getCookie("page")
+      },
       success: function(data){
         console.log(data);
         var count = 1;
-        var big_fragment = ''
+        var big_fragment = '';
         $.each(data, function() {
-          var add_actions_column = "<th colspan='2'>Delete</th>";
-          var actions_function = "<td onclick='call_delete(" + this.id + ")'>Delete</td>"
-                               + "<td><a href='/books/edit/" + this.id + ">Edit</a><td>";
-          var buttonForAdmin = ""
-          if (is_admin_session == true){
+          var actions_function = "<td onclick='call_delete(" + this.id + ")'><a>Delete</a></td>"
+                               + "<td><a href='/books/edit/" + this.id + "'>Edit</a></td>";
+          var buttonForAdmin = "";
+          if (admin_session == true){
             buttonForAdmin = actions_function;
-          }
+          };
 
           if (getCookie("page") != "") {
             var offset = parseInt(getCookie("page")) - 1;
             var numpos = offset * 5 + count++;
-          }
-          big_fragment += "<tr>"
+          };          
+          big_fragment = big_fragment
+                        + "<tr>"
                         +   "<td>" + numpos + "</td>"
                         +   "<td>" + "<a href=/books/show/" + this.id + ">" + this.title + "</a>" + "</td>"
                         +   "<td>" + this.author + "</td>"
-                        +   "<td>" + this.user.username + "</td>"
+                        +   "<td>" + this.member.email + "</td>"
                         +   "<td>" + moment(this.created_at).fromNow() + "</td>"
                         +   "<td>" + moment(this.updated_at).fromNow() + "</td>"
+                        +   buttonForAdmin
                       +   "</tr>";
         });
-        // var tt = "onclick=" + "setSortCookie(" + "'" + "title" + "'" + ")";
+        var add_actions_column = "<th colspan='2'>ADMIN ACTIONS</th>";
+        var admin_col = "";
+        if (admin_session) admin_col = add_actions_column;
         var headers = "<tr>"
                       + "<th>ID</th>"
-                      + "<th>Title" + "<button " + "onclick=" + "setSortCookie(" + "'" + "title" + "'" + ")" + ">v</button>" + "</th>"
-                      + "<th>Author" + "<button " + "onclick=" + "setSortCookie(" + "'" + "author" + "'" + ")" + ">v</button>" + "</th>"
-                      + "<th>Created by" + "<button " + "onclick=" + "setSortCookie(" + "'" + "username" + "'" + ")" + ">v</button>" + "</th>"
-                      + "<th>Created at" + "<button " + "onclick=" + "setSortCookie(" + "'" + "created_at" + "'" + ")" + ">v</button>" + "</th>"
-                      + "<th>Updated at" + "<button " + "onclick=" + "setSortCookie(" + "'" + "updated_at" + "'" + ")" + ">v</button>" + "</th>"
-                    + "</tr>"
+                      + "<th>Title" + "<button " + "onclick=" + "setSortParam(" + "'" + "title" + "'" + ")" + ">v</button>" + "</th>"
+                      + "<th>Author" + "<button " + "onclick=" + "setSortParam(" + "'" + "author" + "'" + ")" + ">v</button>" + "</th>"
+                      // + "<th>Created by" + "<button " + "onclick=" + "setSortParam(" + "'" + "member" + "'" + ")" + ">v</button>" + "</th>"
+                      + "<th>Created by</th>"
+                      + "<th>Created at" + "<button " + "onclick=" + "setSortParam(" + "'" + "created_at" + "'" + ")" + ">v</button>" + "</th>"
+                      + "<th>Updated at" + "<button " + "onclick=" + "setSortParam(" + "'" + "updated_at" + "'" + ")" + ">v</button>" + "</th>"
+                      + admin_col
+                    + "</tr>";
         $('#books_table').fadeOut('fast', function() {
             $('#books_table').empty();
             $('#books_table').fadeIn('fast', function(){
@@ -124,20 +145,22 @@
   }
 
   function ajax_GetTable(){
-    var is_admin_session;
-    if (getCookie("token")){
+    if (localStorage.getItem("access-token") != null){
       $.ajax({
-        url: "http://localhost:3000/api/v1/users/" + getCookie("user_id") + "/check_admin",
-        headers: { "Authorization": "Token token=" + getCookie('token') },
+        url: api_url + "members/check_admin",
+        headers: {
+          "access-token": localStorage.getItem("access-token"),
+          "client":       localStorage.getItem("client"),
+          "uid":          localStorage.getItem("uid"),
+          "expiry":       localStorage.getItem("expiry")
+        },
         type: "GET",
         dataType: "json",
         success: function(data){
           console.log("admin_session");
-          is_admin_session = data.admin;
-          ajax_GetAllBooks(is_admin_session); // with login
+          ajax_GetAllBooks(data.admin); // with login
         },
         error: function(data){
-          //ajax_GetAllBooks(false);
         }
       });
     } else {
@@ -147,6 +170,7 @@
   }
 
   function change_page_cookie(changeto){
+    // cookie relevant
     if (getCookie("page") == changeto){
       $('#pagination_' + getCookie("page")).removeClass('disabled');
     };
@@ -160,17 +184,17 @@
 
     // set default sort-by value when calling ajax to server to get books
     $('#change-sort-by-title').click(function(e){
-      setCookie("sort_by", "title", 15);
+      localStorage.setItem("sort_by", "title");
     });
     $('#change-sort-by-newest').click(function(e){
-      setCookie("sort_by", "newest", 15);
+      localStorage.setItem("sort_by", "newest");
     });
     $('#change-sort-by-oldest').click(function(e){
-      setCookie("sort_by", "oldest", 15);
+      localStorage.setItem("sort_by", "oldest");
     });
 
     $.ajax({
-      url: "http://localhost:3000/api/v1/books/total",
+      url: api_url + "books/total",
       type: "GET",
       dataType: "json",
       success: function(data){
@@ -199,6 +223,11 @@
           change_page_cookie(pageNum);
         }
       }
+    });
+
+    $('#btnExport').click(function(event) {
+      event.preventDefault();
+      window.location = api_url + "books/xls";
     });
   });
 

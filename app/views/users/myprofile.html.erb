@@ -8,7 +8,7 @@
   </div>
 </form>
 
-<button id="del_btn" type="button">Delete this user?</button>
+<button id="del_btn" type="button">Delete self?</button>
 
 <div id="test"></div>
 
@@ -16,7 +16,13 @@
   $(document).ready(function(){
     $.ajax({
       type: "GET",
-      url: api_url + "members/" + <%= "#{params[:id]}" %>,
+      url: api_url + "members/self",
+      headers: {
+        "access-token": localStorage.getItem("access-token"),
+        "client":       localStorage.getItem("client"),
+        "uid":          localStorage.getItem("uid"),
+        "expiry":       localStorage.getItem("expiry")
+      },
       dataType: "json",
       success: function(data){
         console.log(data);
@@ -33,7 +39,7 @@
 
       $.ajax({
           type: "PUT",
-          url: api_url + "members/" + <%= "#{params[:id]}" %>,
+          url: api_url + "members",
           headers: {
             "access-token": localStorage.getItem("access-token"),
             "client":       localStorage.getItem("client"),
@@ -54,7 +60,7 @@
       });
     });
     $( "#del_btn" ).click(function( ) {
-      if (localStorage.getItem('access-token') != null)
+      if (localStorage.getItem('access-token'))
         ajax_CheckAdminAndDeleteUser();
       else
         alertAtElement("test", "You need to log in first!");
@@ -83,7 +89,7 @@
   function ajax_DeleteUser(){
     $.ajax({
       type: "DELETE",
-      url: api_url + "members/" + <%= "#{params[:id]}" %>,
+      url: api_url + "members",
       headers: {
         "access-token": localStorage.getItem("access-token"),
         "client":       localStorage.getItem("client"),
@@ -91,8 +97,12 @@
         "expiry":       localStorage.getItem("expiry")
       },
       success: function(){
-        //alertAtElement("test", 'The user has succesffuly deleted);
+        alertAtElement("test", 'The user has succesffuly deleted');
         alert("The user have been deleted!");
+        localStorage.removeItem("access-token");
+        localStorage.removeItem("client");
+        localStorage.removeItem("uid");
+        localStorage.removeItem("expiry");
         window.location.replace("/");
       },
       error: function(data){

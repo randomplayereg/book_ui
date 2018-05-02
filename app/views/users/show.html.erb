@@ -1,30 +1,22 @@
 <p>
-  <strong>Title:</strong>
+  <strong>Email: </strong>
   <span id="title"></span>
 </p>
 
 <p>
-  <strong>Author:</strong>
-  <span id="author"></span>
-</p>
-
-<p>
-  <strong>Creator:</strong>
-  <span id="creator"></span>
+  <strong>Book(s) created: </strong>
+  <span id="book_count"></span>
 </p>
 
 <script>
 $('document').ready(function(){
-  var url = "http://localhost:3000/api/v1/books/" + <%= params[:id] %>
   $.ajax({
     type: "GET",
-    url: url,
+    url: api_url + "members/" + <%= params[:id] %>,
     dataType: "json",
     success: function(data){
-      console.log(data);
-      $('#title').html(data.title);
-      $('#author').html(data.author);
-      $('#creator').html(data.user.username);
+      $('#email').html(data.email);
+      $('#book_count').html(data.book_count);
     }
   });
 });
